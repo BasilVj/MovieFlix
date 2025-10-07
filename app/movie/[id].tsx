@@ -1,17 +1,23 @@
-import {
-  View,
-  Text,
-  Image,
-  ActivityIndicator,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-
 import { icons } from "@/constants/icons";
 import useFetch from "@/hooks/useFetch";
 import { fetchMovieDetails } from "@/services/api";
+import {
+  getStoreData,
+  RemoveMovieId,
+  setStoreData,
+} from "@/utils/secureStoreUtils";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface MovieInfoProps {
   label: string;
@@ -30,10 +36,31 @@ const MovieInfo = ({ label, value }: MovieInfoProps) => (
 const Details = () => {
   const router = useRouter();
   const { id } = useLocalSearchParams();
-
+  const [isSaved, setIsSaved] = useState(false);
   const { data: movie, loading } = useFetch(() =>
     fetchMovieDetails(id as string)
   );
+
+  const checkIfSaved = async () => {
+    const savedMovieIds: number[] = await getStoreData("saved");
+    setIsSaved(savedMovieIds.includes(Number(id)));
+  };
+
+  const handleSave = async () => {
+    if (isSaved) {
+      await RemoveMovieId(Number(id));
+      setIsSaved(false);
+    } else {
+      await setStoreData(Number(id));
+      setIsSaved(true);
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      checkIfSaved();
+    }
+  }, [id]);
 
   if (loading)
     return (
@@ -54,11 +81,14 @@ const Details = () => {
             resizeMode="stretch"
           />
 
-          <TouchableOpacity className="absolute bottom-5 right-5 rounded-full size-14 bg-white flex items-center justify-center">
-            <Image
-              source={icons.play}
-              className="w-6 h-7 ml-1"
-              resizeMode="stretch"
+          <TouchableOpacity
+            className="absolute bottom-5 right-5 rounded-full size-14 bg-slate-400 flex items-center justify-center"
+            onPress={handleSave}
+          >
+            <AntDesign
+              name="heart"
+              size={22}
+              color={isSaved ? "red" : "white"}
             />
           </TouchableOpacity>
         </View>
