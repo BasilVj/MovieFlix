@@ -2,10 +2,11 @@ import { icons } from "@/constants/icons";
 import useFetch from "@/hooks/useFetch";
 import { fetchMovieDetails } from "@/services/api";
 import {
-  getStoreData,
-  RemoveMovieId,
+  isMovieSaved,
+  removeMovie,
   setStoreData,
 } from "@/utils/secureStoreUtils";
+import { mapMovieDetailsToMovie } from "@/utils/transform";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -42,16 +43,19 @@ const Details = () => {
   );
 
   const checkIfSaved = async () => {
-    const savedMovieIds: number[] = await getStoreData("saved");
-    setIsSaved(savedMovieIds.includes(Number(id)));
+    const saved = await isMovieSaved(Number(id));
+    setIsSaved(saved);
   };
 
   const handleSave = async () => {
+    if (!movie) return;
+
     if (isSaved) {
-      await RemoveMovieId(Number(id));
+      await removeMovie(movie.id);
       setIsSaved(false);
     } else {
-      await setStoreData(Number(id));
+      const simplifiedMovie = mapMovieDetailsToMovie(movie); // 🔁 convert
+      await setStoreData(simplifiedMovie); // ✅ store as Movie
       setIsSaved(true);
     }
   };
