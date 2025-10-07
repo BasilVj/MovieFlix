@@ -40,32 +40,44 @@ const Saved = () => {
           paddingBottom: 10,
         }}
       >
+        {" "}
         <Image source={icons.logo} className="w-12 h-10 mt-20 mb-5 mx-auto" />
-        {isLoading ? (
-          <ActivityIndicator
-            size="large"
-            color="#0000ff"
-            className="mt-10 self-center"
-          />
+        {movies.length > 0 ? (
+          <>
+            {isLoading ? (
+              <ActivityIndicator
+                size="large"
+                color="#0000ff"
+                className="mt-10 self-center"
+              />
+            ) : (
+              <View className="mt-10">
+                <Text className="text-lg text-white font-bold mb-3">
+                  Saved Movies
+                </Text>
+                <FlatList
+                  data={movies}
+                  keyExtractor={(item) => item.id.toString()}
+                  numColumns={3}
+                  columnWrapperStyle={{
+                    justifyContent: "flex-start",
+                    gap: 20,
+                    paddingRight: 5,
+                    marginBottom: 10,
+                  }}
+                  scrollEnabled={false}
+                  className="mt-2 pb-32"
+                  renderItem={({ item }) => <MovieCard {...item} />}
+                />
+              </View>
+            )}
+          </>
         ) : (
-          <View className="mt-10">
-            <Text className="text-lg text-white font-bold mb-3">
-              Saved Movies
+          <View className="flex justify-center items-center h-[75%]">
+            <Image source={icons.save} className="size-10" tintColor="#fff" />
+            <Text className="text-gray-500 text-lg max-w-xs text-center">
+              Your saved movies will appear here. Start by adding some!
             </Text>
-            <FlatList
-              data={movies}
-              keyExtractor={(item) => item.id.toString()}
-              numColumns={3}
-              columnWrapperStyle={{
-                justifyContent: "flex-start",
-                gap: 20,
-                paddingRight: 5,
-                marginBottom: 10,
-              }}
-              scrollEnabled={false}
-              className="mt-2 pb-32"
-              renderItem={({ item }) => <MovieCard {...item} />}
-            />
           </View>
         )}
       </ScrollView>
